@@ -5,7 +5,19 @@
  */
 package analizador_lexico;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -75,13 +87,49 @@ public class Interface extends javax.swing.JFrame {
         JFileChooser chooser = new JFileChooser();
         File file;
         String path; 
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("Archivo de texto", "txt", "php");
-        int value = chooser.showOpenDialog(this);
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("PHP"," php");
+        int value = chooser.showOpenDialog(this); 
         if(value == JFileChooser.APPROVE_OPTION){
             file = chooser.getSelectedFile();
-            
+            try { 
+                CheckLex(file);
+            } catch (IOException ex) {
+                Logger.getLogger(Interface.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
+
+    public static void CheckLex(File file) throws FileNotFoundException, IOException{
+        String path = file.getPath();
+        Reader reader = new BufferedReader(new FileReader(path));
+        PHPLexer lex = new PHPLexer(reader);
+        String result = "";
+        while(true){
+            Token token = lex.yylex();
+            String lineCode = lex.token;
+            if(token == null){
+                result += "EOF";
+                //here you shoul generate the new file
+                String pathOut = file.getCanonicalPath().substring(0 , file.getCanonicalPath().length() -3) + "out";
+                File out = new File(pathOut); 
+                FileOutputStream fos = new FileOutputStream(out);
+                OutputStreamWriter osw = new OutputStreamWriter(fos);    
+                Writer w = new BufferedWriter(osw);
+                w.write(result);
+                return; 
+            }
+            switch(token){
+                case ERROR:
+                    result += "ERROR simbolo no reconocido" + System.getProperty("line.separator");
+                    break; 
+                default:
+                    result += lineCode + System.getProperty("line.separator");
+                    break; 
+            }
+            
+        }
+    }
+    
 
     /**
      * @param args the command line arguments

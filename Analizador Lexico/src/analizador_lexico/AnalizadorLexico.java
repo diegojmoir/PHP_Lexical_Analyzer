@@ -20,8 +20,7 @@ public class AnalizadorLexico {
         // TODO code application logic here
         String path = new File(".").getAbsolutePath();
         path = path.substring(0, path.length()-1) + "/src" + "/analizador_lexico" + "/PHP.flex";
-        GenerateJflex(path);
-   
+        GenerateJflex(path);  
     }
     
     public static void GenerateJflex(String path){
