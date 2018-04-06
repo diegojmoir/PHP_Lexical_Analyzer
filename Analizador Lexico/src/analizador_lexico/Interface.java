@@ -5,6 +5,7 @@
  */
 package analizador_lexico;
 
+import java.awt.List;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -32,6 +33,7 @@ public class Interface extends javax.swing.JFrame {
      */
     public Interface() {
         initComponents();
+         this.jTextArea1.setEditable(false);
     }
 
     /**
@@ -43,12 +45,21 @@ public class Interface extends javax.swing.JFrame {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
+        jScrollPane1 = new javax.swing.JScrollPane();
+        jTextArea1 = new javax.swing.JTextArea();
+        jLabel1 = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         jMenuItem1 = new javax.swing.JMenuItem();
-        jMenu2 = new javax.swing.JMenu();
+        jMenuItem2 = new javax.swing.JMenuItem();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+
+        jTextArea1.setColumns(20);
+        jTextArea1.setRows(5);
+        jScrollPane1.setViewportView(jTextArea1);
+
+        jLabel1.setText("Result");
 
         jMenu1.setText("File");
 
@@ -61,10 +72,16 @@ public class Interface extends javax.swing.JFrame {
         });
         jMenu1.add(jMenuItem1);
 
-        jMenuBar1.add(jMenu1);
+        jMenuItem2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        jMenuItem2.setText("Exit");
+        jMenuItem2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jMenuItem2ActionPerformed(evt);
+            }
+        });
+        jMenu1.add(jMenuItem2);
 
-        jMenu2.setText("Edit");
-        jMenuBar1.add(jMenu2);
+        jMenuBar1.add(jMenu1);
 
         setJMenuBar(jMenuBar1);
 
@@ -72,11 +89,22 @@ public class Interface extends javax.swing.JFrame {
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 400, Short.MAX_VALUE)
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 456, Short.MAX_VALUE)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(jLabel1)
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 279, Short.MAX_VALUE)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 290, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         pack();
@@ -99,14 +127,22 @@ public class Interface extends javax.swing.JFrame {
         }
     }//GEN-LAST:event_jMenuItem1ActionPerformed
 
-    public static void CheckLex(File file) throws FileNotFoundException, IOException{
+    private void jMenuItem2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jMenuItem2ActionPerformed
+        // TODO add your handling code here:
+        System.exit(0);    
+    }//GEN-LAST:event_jMenuItem2ActionPerformed
+
+    public  void CheckLex(File file) throws FileNotFoundException, IOException{
         String path = file.getPath();
+        boolean flag = true; 
         Reader reader = new BufferedReader(new FileReader(path));
         PHPLexer lex = new PHPLexer(reader);
         String result = "";
+        String errors = "";
         while(true){
             Token token = lex.yylex();
             String lineCode = lex.token;
+            int lineNumber = lex.lineNumber; 
             if(token == null){
                 result += "EOF";
                 //here you shoul generate the new file
@@ -115,14 +151,29 @@ public class Interface extends javax.swing.JFrame {
                 FileOutputStream fos = new FileOutputStream(out);
                 OutputStreamWriter osw = new OutputStreamWriter(fos);    
                 Writer w = new BufferedWriter(osw);
-                w.write(result);
+                
+                if(flag){
+                    this.jTextArea1.setText(result);
+                    w.write(result); 
+                }else{
+                    this.jTextArea1.setText(errors);
+                    w.write(errors);
+                }
+                
+                w.close();
                 return; 
             }
             switch(token){
                 case ERROR:
-                    result += "ERROR simbolo no reconocido" + System.getProperty("line.separator");
+                    flag = false; 
+                    errors += "ERROR simbolo no reconocido Linea: " + lineNumber + System.getProperty("line.separator");
                     break; 
                 default:
+                    if(lineCode.contains("$recordset[")){
+                        String aux = lineCode.substring(12, lineCode.length()-1); 
+                        lineCode = "$recordset[" + aux.toUpperCase() + "]"; 
+                        boolean t = true; 
+                    }
                     result += lineCode + System.getProperty("line.separator");
                     break; 
             }
@@ -130,6 +181,24 @@ public class Interface extends javax.swing.JFrame {
         }
     }
     
+     public static List getText(File file) throws FileNotFoundException, IOException{
+         List lines = new List();
+         FileReader reader;
+                reader = new FileReader(file);
+                BufferedReader readFile = new BufferedReader(reader);
+                String line = "";
+                
+                line = readFile.readLine();
+                while(line != null){
+                    if(!line.equals("")){
+                        lines.add(line.trim());
+                    }
+                    line = readFile.readLine();
+                }           
+                reader.close();
+                readFile.close();
+                return lines;     
+    }
 
     /**
      * @param args the command line arguments
@@ -167,9 +236,12 @@ public class Interface extends javax.swing.JFrame {
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JMenu jMenu1;
-    private javax.swing.JMenu jMenu2;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem1;
+    private javax.swing.JMenuItem jMenuItem2;
+    private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JTextArea jTextArea1;
     // End of variables declaration//GEN-END:variables
 }

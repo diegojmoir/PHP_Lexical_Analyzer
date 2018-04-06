@@ -1,0 +1,25 @@
+/*Regular Expresions */
+identifier = [a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]* 
+decimalS = [1-9][1-9]* | 0
+hexa = 0[xX][0-9a-fA-F]+
+octal = 0[0-7]+
+binary = 0[bB][01]+
+integer = [+-]?{decimalS} | [+-]?{hexa} | [+-]?{octal} | [+-]?{binary}
+decimal = ({digit}*[\.]{digit}+) | ({digit}+[\.]({digit})*)
+number = [0-9]+
+decimal = [+-]?([0-9]*[\.]{number}) | ({number}[\.][0-9]*)
+exponent = [+-]?(({number} | {decimal}) [eE][+-]?{number})
+comments = (.*\/\*[^\/]+\/\s)|(\/\/.*)|(\#.*)
+whiteSpace =  [\n\r\t]|(" ")|(\r\n)|(\n) 
+lineBreak = [\n]
+stringCharacter = [^\u2028\u2029\u000A\u000B\u000C\u000D\u0085\"\\]
+escapeSequence = \\[^\u2028\u2029\u000A\u000B\u000C\u000D\u0085]|\\
+string = (\"|\')({stringCharacter} | {escapeSequence})*(\"|\')
+compileConstant = (_)(CLASS|DIR|FILE|FUNCTION|LINE|METHOD|NAMESPACE|TRAIT)(_)
+varNum = (\$)[0-9]+
+variable = (\$){identifier}
+dataBase = (\$)(recordset)(\[\')[a-zA-Z_0-9]+(\'\])
+escape = (\\)
+questionMark = \?
+quotation = \"
+ 
