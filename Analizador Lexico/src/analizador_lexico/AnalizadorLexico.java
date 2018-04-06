@@ -18,20 +18,18 @@ public class AnalizadorLexico {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new Interface().setVisible(true);
-            }
-        });
+         
         String path = new File(".").getAbsolutePath();
         path = path.substring(0, path.length()-1) + "/src" + "/analizador_lexico" + "/PHP.flex";
-        GenerateJflex(path);  
-       
+        GenerateJflex(path); 
+        
     }
-    
-    public static void GenerateJflex(String path){
+        
+     public static void GenerateJflex(String path){
         File file = new File(path);
         jflex.Main.generate(file);
-    }
+     }
+     
+   
     
 }
