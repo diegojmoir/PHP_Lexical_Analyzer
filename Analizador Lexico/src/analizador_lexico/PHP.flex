@@ -27,7 +27,7 @@ decimal = ({digit}*[\.]{digit}+) | ({digit}+[\.]({digit})*)
 number = [0-9]+
 decimal = [+-]?([0-9]*[\.]{number}) | ({number}[\.][0-9]*)
 exponent = [+-]?(({number} | {decimal}) [eE][+-]?{number})
-comments = (.*\/\*[^\/]+\/\s)|(\/\/.*)|(\#.*)
+comments = (("/*")~("*/"))|(\/\/.*)|(\#.*)
 whiteSpace =  [\n\r\t]|(" ")|(\r\n)|(\n) 
 lineBreak = [\n]
 stringCharacter = [^\u2028\u2029\u000A\u000B\u000C\u000D\u0085\"\\]
@@ -40,18 +40,26 @@ dataBase = (\$)(recordset)(\[\')[a-zA-Z_0-9]+(\'\])
 escape = (\\)
 questionMark = \?
 quotation = \"
- 
+simpleQuotation = \'
+someChars = (==|\)){number}
+equalsVal = (=)[^](=)
+commentError = (\/\*)~(\n)
+otherDB = (\$)({identifier})(\[\')[a-zA-Z_0-9]+(\'\])
 %%
 
 /* Patterns */
 
 /*Some erros and validations  that must be first */
+{otherDB} {token = yytext(); lineNumber = yyline; return DB;}
+{someChars}({identifier}|{variable}) {token = yytext(); lineNumber = yyline; return ERROR;}
 {varNum} {token = yytext(); lineNumber = yyline; return ERROR;}
 {variable}  {token = yytext(); lineNumber = yyline; return VAR;}
 {dataBase} {token = yytext(); lineNumber = yyline; return DB; }
 {escape} {token = yytext(); lineNumber = yyline; return ESC; }
 {questionMark}  {token = yytext(); lineNumber = yyline; return QUESTION;}
 {quotation} {token = yytext(); lineNumber = yyline; return QUOTATION; }
+{simpleQuotation} {token = yytext(); lineNumber = yyline; return S_QUOTATION; }
+{comments} {token = yytext(); lineNumber = yyline; return COMMENT;}
 
 /*Keywords*/
 "__halt_compiler" {token = yytext(); lineNumber = yyline; return HALT_COMPILER;}
@@ -128,6 +136,7 @@ quotation = \"
 "++" {token = yytext(); lineNumber = yyline; return INCR;}
 "--" {token = yytext(); lineNumber = yyline; return DECR;}
 "===" {token = yytext(); lineNumber = yyline; return IDENTICAL;}
+{equalsVal} {token = yytext(); lineNumber = yyline; return ERROR;}
 "==" {token = yytext(); lineNumber = yyline; return EQUAL;}
 "!==" {token = yytext(); lineNumber = yyline; return NOT_IDENTICAL;}
 "!=" {token = yytext(); lineNumber = yyline; return NOT_EQUAL;}
@@ -183,10 +192,10 @@ quotation = \"
 {number}|{integer} {token = yytext(); lineNumber = yyline; return NUMBER;}
 {decimal}|{exponent} {token = yytext(); lineNumber = yyline; return REAL_NUM;}
 {identifier} {token = yytext(); lineNumber = yyline; return ID;}
-{comments} {token = yytext(); lineNumber = yyline; return COMMENT;}
+
 {string}  {token = yytext(); lineNumber = yyline; return STRING;}
 
 /* Compile-time constants*/
 {compileConstant} = {token = yytext(); lineNumber = yyline; return C_CONSTANT;}
 
-. {token = yytext(); lineNumber = yyline; return ERROR;}
+{commentError}|. {token = yytext(); lineNumber = yyline; return ERROR;}

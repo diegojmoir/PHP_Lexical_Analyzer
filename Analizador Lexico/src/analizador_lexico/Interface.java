@@ -173,6 +173,10 @@ public class Interface extends javax.swing.JFrame {
                         String aux = lineCode.substring(12, lineCode.length()-1); 
                         lineCode = "$recordset[" + aux.toUpperCase() + "]"; 
                         boolean t = true; 
+                    }else if(lineCode.contains("$") && lineCode.contains("[")){
+                        String[] aux = lineCode.split("'");
+                        lineCode = aux[0] + "'" + aux[1].toUpperCase() + "']";
+                        boolean som = true; 
                     }
                     result += lineCode + System.getProperty("line.separator");
                     break; 
